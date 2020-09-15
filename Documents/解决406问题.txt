@@ -1,0 +1,10 @@
+解决406问题
+在springmvc中配置：
+
+
+<!-- 配置内容协调管理器，解决406问题 -->	
+	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="false" />
+	</bean>
+	<!-- 注解驱动 -->
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />

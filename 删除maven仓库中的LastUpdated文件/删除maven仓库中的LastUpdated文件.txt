@@ -1,0 +1,36 @@
+删除maven仓库中的LastUpdated文件
+
+maven仓库中的某个构件如果因为网络或者其他的原因，没有下载成功或者下载被中断，将会出现一个LastUpdated的文件，这个时候，就算网络好了，也不能正常使用这个构件，而且你还不太好发现这个LastUpdated到底在哪，所以我就写了一个批处理，一劳永逸
+
+
+cleanLastUpdated.bat(Windows版本) :
+
+@echo off
+rem create by BoBoTeacher(zhangbo1@itcast.cn)
+rem crazy coder
+  
+rem 这里写你的仓库路径，下面读取的是环境变量中配置的路径
+set REPOSITORY_PATH=%M2_HOME%\repository
+rem 正在搜索...
+for /f "delims=" %%i in ('dir /b /s "%REPOSITORY_PATH%\*lastUpdated*"') do (
+    del /s /q %%i
+)
+rem 搜索完毕
+pause
+
+
+cleanLastUpdated.sh(mac/linux版本) 
+
+# create by BoBoTeacher(zhangbo1@itcast.cn)                                                                        
+# crazy coder
+   
+# 这里写你的仓库路径
+REPOSITORY_PATH=~/Documents/tools/apache-maven-3.0.3/repository
+echo 正在搜索...
+find $REPOSITORY_PATH -name "*lastUpdated*" | xargs rm -fr
+echo 搜索完
+
+
+
+
+

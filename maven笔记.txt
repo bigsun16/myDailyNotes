@@ -1,0 +1,68 @@
+maven
+settings.xml
+####################################################
+设置maven项目的jdk版本：
+####################################################
+<profile>    
+	<id>jdk-1.8</id>    
+	<activation>    
+		<activeByDefault>true</activeByDefault>    
+		<jdk>1.8</jdk>    
+	</activation>    
+	<properties>    
+		<maven.compiler.source>1.8</maven.compiler.source>    
+		<maven.compiler.target>1.8</maven.compiler.target>    
+		<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>    
+	</properties>    
+</profile> 
+
+####################################################
+设置阿里私服：
+####################################################
+<mirror>
+      <id>alimaven</id>
+      <name>aliyun maven</name>
+      <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+      <mirrorOf>central</mirrorOf>        
+</mirror>
+
+####################################################
+下载源代码
+####################################################
+mvn dependency:sources -DdownloadSources=true -DdownloadJavadocs=true
+
+####################################################
+maven 构建编译失败：Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:
+####################################################
+參考：https://blog.csdn.net/u011734144/article/details/51894942#reply
+在项目的pom.xml文件中：该代码放于project节点下：
+pom中如下配置maven编译插件：
+
+<build>
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.1</version>
+			<configuration>
+				<verbose>true</verbose>
+				<fork>true</fork>
+				<executable>${JAVA8_HOME}/bin/javac</executable>
+			</configuration>
+		</plugin>
+	</plugins>
+</build>
+上面JAV A8_HOME在%maven安装目录%/conf/settings.xml中profiles节点下新增如下；
+
+<profile>
+  <id>custom-compiler</id>
+  <properties>
+	<JAVA8_HOME>C:\fastDev\Java\jdk1.8.0_91</JAVA8_HOME>
+  </properties>
+</profile>
+配置后还要激活上面的配置，在settings节点下配置。
+<activeProfiles>
+        <activeProfile>custom-compiler</activeProfile>
+</activeProfiles>
+完美解決
+

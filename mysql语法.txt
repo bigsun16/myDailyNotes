@@ -1,0 +1,178 @@
+#################################数据库#################################
+********CREATE（创建）********
+CREATE DATABASE db_name;
+CREATE DATABASE IF NOT EXISTS db_name;
+CREATE DATABASE db_name CHARACTER SET UTF8;
+CREATE DATABASE IF NOT EXISTS db_name CHARACTER SET UTF8;
+
+********Retrieve（查看）********
+SHOW DATABASES;
+SHOW CREATE DATABASE db_name;#查看指定数据库创库语句
+SELECT DATABASE();#查看当前正在使用的数据库
+
+********UPDATE（更新）********
+ALTER DATABASE db_name CHARACTER SET GBK;
+
+********DELETE（删除）********
+DROP DATABASE db_name;
+DROP DATABASE IF EXISTS db_name;
+
+********USE DATABASE（使用数据库）********
+USE db_name;
+
+********（备份与还原数据库）********
+备份：mysqldump -u用户名 -p密码 数据库名称 > d://a.sql
+还原：source 文件路径 
+
+#################################数据表#################################
+********CREATE（创建）********
+约束：非空约束 主键约束 唯一约束 外键约束
+
+CREATE TABLE t_name {
+	列名1 数据类型，
+	列名2 数据类型，
+	列名3 数据类型，
+	...
+	列名n 数据类型
+}
+example:
+CREATE TABLE student{
+	id INT PRIMARY KEY AUTO_INCREMENT,#主键 非空且唯一,自增长，
+	name VARCHAR(32) NOT NULL,
+	age INT,
+	score DOUBLE(4,1),#最大4位数，小数点后有1位
+	birthday DATE,#yyyy-MM-dd
+	phoneNum VARCHAR(11) UNIQUE,#唯一约束 同一个字段可以有多个null
+	insert_time TIMESTAMP#yyyy-MM-dd如果不设置值，将默认为系统当前时间
+}
+
+CREATE TABLE department {
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	dep_name VARCHAR(20),
+	dep_location VARCHAR(20)
+}
+
+CREATE TABLE employee{
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	name VARCHAR(20),
+	age INT,
+	dep_id INT,
+	CONSTRAINT emp_dept_fk FOREIGN KEY (dep_id) REFERENCES department(id) ON UPDATE CASCADE ON DELETE CASCADE#创建外键,级联修改，级联删除
+}
+
+
+CREATE TABLE stu LIKE student;#复制表结构
+
+********Retrieve（查看）********
+SHOW tables;
+DESC t_name;
+
+********UPDATE（更新）********
+ALTER TABLE t_name RENAME TO new_t_name;
+ALTER TABLE t_name CHARACTER SET UTF8;
+ALTER TABLE t_name ADD 列名 数据类型;
+ALTER TABLE t_name CHANGE 列名 新列名 数据类型;
+ALTER TABLE t_name MODIFY 列名 新数据类型; #这样可以删除not null非空约束,如果有的话
+ALTER TABLE t_name DROP 列名;
+ALTER TABLE student DROP INDEX phoneNum;#删除unique唯一约束
+ALTER TABLE student DROP PRIMARY KEY ;#删除主键
+ALTER TABLE employee DROP FOREIGN KEY emp_dept_fk;#删除外键
+********DELETE（删除）********
+DROP TABLE t_name;
+
+#################################数据记录#################################
+********CREATE（创建）********
+INSERT INTO t_name (列名1,列名2...列名n) VALUES (值1,值2...值n);
+INSERT INTO t_name VALUES (值1,值2...值n);#除了数字类型，其他的类型数据都用引号包起来
+********DELETE（删除）********
+DELETE FROM t_name [WHERE 条件]
+#没条件就会清空表数据
+TRUNCATE TABLE t_name;
+********UPDATE（更新）********
+UPDATE t_name SET 列名1=value,列名2=value [WHERE 条件];#不加条件将修改所有记录的列值
+********Retrieve（查看）********
+SELECT 字段列表
+FROM 表名列表
+WHERE 条件列表
+GROUP BY 分组列名
+HAVING 分组之后的条件
+ORDER BY 排序列表
+LIMIT 分页
+
+SELECT DISTINCT 列名 FROM t_name;#去重
+
+SELECT name, math, english, math+english FROM student;#如果有null值参与运算，计算结果为null。
+SELECT name, math, english, math + IFNULL(english,0) AS sum FROM student;
+
+SELECT * FROM student WHERE age BETWEEN 18 AND 20;#包含头，包含尾
+SELECT * FROM student WHERE age IN (18,19,20);
+SELECT * FROM student WHERE english IS NULL;
+SELECT * FROM student WHERE name LIKE "马%";#马开头
+SELECT * FROM student WHERE name LIKE "_马%";#第二个是马
+SELECT * FROM student WHERE name LIKE "___";#有三个字符
+SELECT * FROM student WHERE name LIKE "%马%";#包含马的
+
+SELECT * FROM student ORDER BY math ASC, english ASC;
+
+聚合函数：COUNT(非空) SUM AVG MAX MIN 单列都会忽略Null值
+
+SELECT sex, AVG(math), COUNT(id) 人数 FROM student WHERE math>70 GROUP BY sex HAVING 人数>2;
+
+SELECT * FROM student LIMIT (pageNum-1)*pageSize ,pageSize;
+
+
+查询所有员工信息和所属部门信息列表
+select * from department,employee where department.id = employee.dep_id;
+select * from department inner join employee on department.id = employee.dep_id;#inner 可省略
+
+select t1.*,t2.name from employee t1 left outer join department t2 on t1.dep_id = t2.id;#outer 可省略，左外连接，以左表为主，包含null列
+
+事务四大特性：原子性，持久性，隔离性，一致性
+
+事务隔离级别：
+	存在的问题：
+		脏读：一个事务读取另一个事务未提交的数据
+		幻读：一个事务操作数据表中所有数据，另一个事务增加一条数据，第一个事务查询不到自己的修改
+		不可重复读：同一个事务，两次读取的数据不一致
+	隔离级别：
+		1. read uncommitted 读未提交
+			*引发问题：脏读，不可重复读，幻读
+		2. read committed 读已提交 （Oracle默认）
+			*引发问题：不可重复读，幻读 （MySQL默认）
+		3. repeatable read 可重复读
+			*引发问题：幻读
+		4. serializable: 串行化
+			*可解决所有问题
+	*注意：隔离界别从上到下安全性越来越高，效率越来越低
+
+
+SQL分类：
+	DDL:操作数据库和表
+	DML:增删改表中数据
+	DQL:查询表中数据
+	DCL:管理用户，授权
+	用户记录Host列值为'%'表示可以在任何主机上访问
+	创建用户：create user '用户名'@'主机名' identified by '密码';
+	删除用户：drop user '用户名'@'主机名';
+	修改密码：update user set password = password('新密码') where user = '用户名';
+			  set password for '用户名'@'主机名'  = password('新密码');
+	忘记root用户密码：
+	1.cmd --> net stop mysql 停止MySQL服务
+	2.使用无验证方式登录MySQL: mysqld --skip-grant-tables
+	3.打开cmd新窗口，输入mysql敲回车直接登录
+	4.use mysql;
+	5.update user set password = password('新密码') where user = 'root';
+	6.关闭两个窗口
+	7.打开任务管理器手动关闭mysql.exe服务
+	8.cmd --> net start mysql 启用MySQL服务
+授权：
+	查看用户权限：select grants for '用户名'@'主机名';
+	授予用户权限：grant 权限列表 on 数据库名.表名 to '用户名'@'主机名';
+				  grant select,update,delete on db3.account to 'lisi'@'%';
+				  grant all on *.* to 'zhangsan'@'localhost';#授予所有权限
+	撤销权限：remove 权限列表 on 数据库名.表名 from '用户名'@'主机名';
+	
+	
+	
+	
+	

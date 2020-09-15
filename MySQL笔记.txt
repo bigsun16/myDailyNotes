@@ -1,0 +1,36 @@
+Mysql:
+下载连接： https://dev.mysql.com/downloads/mysql/
+参考网友分享连接： https://blog.csdn.net/zwj1030711290/article/details/80039780
+一：下载文件并解压，配置系统变量
+二：先创建my.ini文件
+三：用此命令初始化MySQL，会生成data目录还有密码，用户名root
+mysqld --defaults-file=D:\mysql8.0\my.ini --initialize --console
+
+四：安装服务
+mysqld --install [服务名]
+卸载服务：参考https://blog.csdn.net/mingtianhaiyouwo/article/details/50387582
+sc delete mysql //这里的mysql是你要删除的服务名
+
+安装完成之后，就可以通过命令net start mysql启动MySQL的服务了。
+五：登录后修改密码：
+ALTER USER ‘root’ @ ’localhost’ IDENTIFIED BY ‘新密码’;
+
+因为之前，MySQL的密码认证插件是“mysql_native_password”，而MySQL8.0.4开始，现在使用的是“caching_sha2_password”。
+
+因为当前有很多数据库工具和链接包都不支持“caching_sha2_password”，为了方便，我暂时还是改回了“mysql_native_password”认证插件。
+
+在MySQL中执行命令：
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+
+修改密码验证插件，同时修改密码。
+
+如果想默认使用“mysql_native_password”插件认证，可以在配置文件中配置default_authentication_plugin项。
+
+[mysqld]
+default_authentication_plugin=mysql_native_password
+
+####################################################
+数据库图形化管理工具
+mysql-workbench Navicat HeidiSQL
+####################################################

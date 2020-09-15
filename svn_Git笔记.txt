@@ -1,0 +1,115 @@
+SVN相关：
+svn 回退到指定版本
+svn up -r reversion
+svn commit之前，add的东西都可以取消。
+通过先执行svn cleanup，再执行svn revert -R fileName
+
+svn info | grep 'Last Changed Rev' | awk '{print $4}'
+
+3.拷贝dist目录到tags目录
+svn copy -r 411727 http://tiger.in.alcatel-lucent.com/svn/axs/nvs.app/branches/9.7.09/web.components/dev/bower/ssc-http-interceptor/dist  http://tiger.in.alcatel-lucent.com/svn/axs/nvs.app/branches/9.7.09/web.components/publish/bower/ssc-http-interceptor/tags/1.0.1 -m"em-commit:CNBMT-533 9.7.09 BMT - Alarm support alarm Object function"
+
+==========================================================================================================================
+#Git相关：
+参考：https://www.liaoxuefeng.com/wiki/896043488029600
+#下载连接：
+https://git-scm.com/downloads
+
+#初始化git仓库
+git init
+
+#初始化用户名和邮箱
+git config --global user.name "Your Name"
+git config --global user.email "email@example.com"
+
+#设置网络代理
+git config --global https.proxy https://127.0.0.1:1080
+git config --global --unset https.proxy
+
+####################################################
+#设置提交忽略文件：
+####################################################
+添加.gitignore文件
+#java
+target
+*.class
+
+# Eclipse
+.classpath
+.project
+.settings
+
+#Idea
+.idea
+*.iml
+
+####################################################
+#使文件生效
+####################################################
+git rm -r --cached .
+git add .
+git commit -m 'We really don't want Git to track this anymore!'
+
+
+#git 命令：
+git add 
+git status
+git commit -m""
+
+
+第1步：创建SSHKey。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件，如果已经有了，可直接跳到下一步。如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：
+ssh-keygen -t rsa -C "youremail@example.com"
+然后一路回车，使用默认值即可，由于这个Key也不是用于军事目的，所以也无需设置密码。
+
+如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+
+第2步：登陆GitHub，打开“Account settings”，“SSH Keys”页面：
+
+然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
+联起来，在以后的推送或者拉取时就可以简化命令。
+
+####################################################
+#将一个本地项目与GitHub上的项目关联
+####################################################
+git remote add origin git@github.com:bigsun16/myTestDemo.git
+或者
+git remote add origin https://github.com/bigsun16/myTestDemo.git
+
+#添加后，远程库的名字就是origin，这是Git默认的叫法，也可以改成别的，但是origin这个名字一看就知道是远程库。
+#下一步，就可以把本地库的所有内容推送到远程库上：
+git push -u origin master
+#把本地库的内容推送到远程，用git push命令，实际上是把当前分支master推送到远程。
+#由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关#联起来，在以后的推送或者拉取时就可以简化命令。
+
+####################################################
+问题：error: failed to push some refs to
+####################################################
+问题原因：远程库与本地库不一致造成的，在hint中也有提示把远程库同步到本地库就可以了。
+
+解决办法：使用命令行：
+
+git pull --rebase origin master
+该命令的意思是把远程库中的更新合并到（pull=fetch+merge）本地库中，–-rebase的作用是取消掉本地库中刚刚的commit，并把他们接到更新后的版本库之中。出现如下图执行pull执行成功后，可以成功执行git push origin master操作。
+
+####################################################
+#查看系统config
+####################################################
+git config --system --list
+
+#查看当前用户（global）配置
+
+git config --global  --list
+ 
+#查看当前仓库配置信息
+
+git config --local  --list
+
+####################################################
+Git远程仓库地址变更本地如何修改
+####################################################
+方法1.git remote set-url origin https://github.com/bigsun16/myTestDemo.git
+方法2.git remote rm origin
+git remote add origin https://github.com/bigsun16/myTestDemo.git
+方法3.进入.git
+vim config
+修改 [remote “origin”]下面的url即可
