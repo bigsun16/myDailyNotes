@@ -26,3 +26,7 @@ https://tool.oschina.net/uploads/apidocs/jquery/regexp.html
 ####################################################
 #强大的菜鸟教程
 https://www.runoob.com/
+
+####################################################
+#spring download
+https://repo.spring.io/release/org/springframework/spring/
