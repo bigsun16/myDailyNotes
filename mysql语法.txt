@@ -173,6 +173,9 @@ SQL分类：
 	撤销权限：remove 权限列表 on 数据库名.表名 from '用户名'@'主机名';
 	
 	
-	
+grant all on *.* to amsadminusr@'%' identified by 'mysql';
+grant all on *.* to root@'%' identified by 'mysql';
+select user, Host, Password from mysql.user;
+flush privileges;
 	
 	

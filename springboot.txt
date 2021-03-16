@@ -1,0 +1,6 @@
+配置文件加载优先级：
+-file:./config
+-file:./
+-classpath:/config
+-classpath:/
+优先级从上到下，高->低,高优先级会覆盖低优先级
