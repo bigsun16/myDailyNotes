@@ -30,3 +30,7 @@ https://www.runoob.com/
 ####################################################
 #spring download
 https://repo.spring.io/release/org/springframework/spring/
+
+####################################################
+#各种数据结构动态演示
+https://www.cs.usfca.edu/~galles/visualization/Algorithms.html
