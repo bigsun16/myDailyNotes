@@ -1,0 +1,98 @@
+version: '3.8'  # 指定使用的 Docker Compose 文件版本
+#free -m要查看 buff/cache 的占用情况;sync && echo 1 > /proc/sys/vm/drop_caches清理页面缓存,这将强制系统将所有脏页（未写入磁盘的已修改页面）写入磁盘并清空页面缓存。
+services:  # 定义服务部分，包含所有要启动的服务
+  elasticsearch:  # 定义名为 elasticsearch 的服务
+    image: elasticsearch:8.16.0  # 使用的 Docker 镜像及标签
+    container_name: elasticsearch  # 设置容器名称为 elasticsearch
+    environment:  # 环境变量设置
+      - discovery.type=single-node  # 单节点集群模式，适合开发和测试环境
+      - ELASTIC_USERNAME=elastic  # Elasticsearch 用户名elastic
+      - ELASTIC_PASSWORD=qihuis  # Elasticsearch 密码（请在生产环境中更改）changeme
+      - xpack.security.enabled=true  # 启用安全特性，默认需要用户名和密码访问
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 设置 JVM 堆内存大小
+    volumes:  # 数据卷挂载
+      - esdata:/usr/share/elasticsearch/data  # 将数据持久化到 Docker 主机上的卷中
+      - esplugins:/usr/share/elasticsearch/plugins  # 将数据持久化到 Docker 主机上的卷中
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    ports:  # 端口映射，将主机端口映射到容器端口
+      - "9200:9200"  # 映射 HTTP REST API 端口
+      - "9300:9300"  # 映射节点间通信端口
+    networks:  # 容器连接的网络
+      - wish_tree  # 自定义网络名称，用于服务间的通信
+
+  kibana:  # 定义名为 kibana 的服务
+    image: kibana:8.16.0  # 使用的 Docker 镜像及标签
+    container_name: kibana  # 设置容器名称为 kibana
+    environment:  # 环境变量设置
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200  # Kibana 连接的 Elasticsearch 地址
+      - ELASTICSEARCH_USERNAME=kibana_system  # Elasticsearch 用户名elastic
+      - ELASTICSEARCH_PASSWORD=WWXtDPxFfxmNqoT97ZMw  # Elasticsearch 密码changeme 执行 docker exec -it elasticsearch bin/elasticsearch-reset-password -u kibana_system  会重置密码
+    ports:  # 端口映射
+      - "5601:5601"  # 映射 Kibana 的 Web 界面端口
+    depends_on:  # 依赖的服务列表
+      - elasticsearch  # 表示 Kibana 依赖于 elasticsearch 服务
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:  # 容器连接的网络
+      - wish_tree  # 自定义网络名称，用于服务间的通信
+
+  mysql:
+    image: mysql:8.0.31
+    restart: always
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - '3306:3306'
+    volumes:
+      - /opt/qihuis/mysql/mysql-conf:/etc/mysql/conf.d
+      - mysql-data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:  # 容器连接的网络
+      - wish_tree 
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      # 挂载Nginx配置文件
+      - /opt/qihuis/nginx/nginx.conf:/etc/nginx/nginx.conf
+      # 挂载静态文件目录 (dist)
+      - /opt/qihuis/nginx/dist:/usr/share/nginx/html
+      # 挂载静态图片目录 (images)
+      - /opt/qihuis/nginx/images:/usr/share/nginx/images
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:  # 容器连接的网络
+      - wish_tree
+
+  wish_tree_app:
+    build: .
+    container_name: wish_tree_app
+    environment:
+      - wish_tree_host.mysql=mysql
+      - wish_tree_host.elasticsearch=elasticsearch
+    ports:
+      - "8888:8888"
+    depends_on:
+      - mysql
+      - elasticsearch
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    networks:
+      - wish_tree
+      
+volumes:  # 定义数据卷
+  esdata:  # 创建一个名为 esdata 的数据卷，用于持久化 Elasticsearch 数据
+  esplugins:  # 新增的卷，用于持久化插件目录
+  mysql-data:
+networks:  # 定义自定义网络
+  wish_tree:  # 创建一个名为 elastic 的自定义网络，以便服务之间可以相互通信
+  
